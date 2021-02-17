@@ -8,7 +8,6 @@ import (
 	"github.com/babon21/statistics-counter-service/pkg/delivery/http/api"
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
-	"github.com/rs/zerolog/log"
 	"net/http"
 	"time"
 )
@@ -20,7 +19,7 @@ type ResponseError struct {
 
 // StatisticsHandler  represent the httphandler for statistics
 type StatisticsHandler struct {
-	statisticsService service.StatisticsService
+	StatisticsService service.StatisticsService
 }
 
 func (h *StatisticsHandler) GetStatisticsList(c echo.Context) error {
@@ -40,9 +39,9 @@ func (h *StatisticsHandler) GetStatisticsList(c echo.Context) error {
 		return c.JSONPretty(http.StatusBadRequest, ResponseError{Message: err.Error()}, "  ")
 	}
 
-	statistics, err := h.statisticsService.GetStatisticsList(request.From, request.To, sortField, sortOrder)
+	statistics, err := h.StatisticsService.GetStatisticsList(request.From, request.To, sortField, sortOrder)
 	if err != nil {
-		return c.JSONPretty(getStatusCode(err), ResponseError{Message: err.Error()}, "  ")
+		return c.JSONPretty(http.StatusInternalServerError, ResponseError{Message: err.Error()}, "  ")
 	}
 
 	response := api.GetStatisticsResponse{Statistics: statistics}
@@ -106,9 +105,9 @@ func (h *StatisticsHandler) SaveStatistics(c echo.Context) error {
 		Cost:   request.Cost,
 	})
 
-	err = h.statisticsService.SaveStatistics(statistics)
+	err = h.StatisticsService.SaveStatistics(statistics)
 	if err != nil {
-		return c.JSONPretty(getStatusCode(err), ResponseError{Message: err.Error()}, "  ")
+		return c.JSONPretty(http.StatusInternalServerError, ResponseError{Message: err.Error()}, "  ")
 	}
 
 	return c.NoContent(http.StatusCreated)
@@ -134,7 +133,7 @@ func validateDate(date string) error {
 }
 
 func (h *StatisticsHandler) ResetStatistics(c echo.Context) error {
-	if err := h.statisticsService.ResetStatistics(); err != nil {
+	if err := h.StatisticsService.ResetStatistics(); err != nil {
 		return c.JSONPretty(http.StatusInternalServerError, ResponseError{Message: err.Error()}, "  ")
 	}
 	return c.NoContent(http.StatusNoContent)
@@ -143,26 +142,10 @@ func (h *StatisticsHandler) ResetStatistics(c echo.Context) error {
 // NewStatisticsHandler will initialize the statistics/ resources endpoint
 func NewStatisticsHandler(e *echo.Echo, s service.StatisticsService) {
 	handler := &StatisticsHandler{
-		statisticsService: s,
+		StatisticsService: s,
 	}
 
 	e.GET("/statistics", handler.GetStatisticsList)
 	e.POST("/statistics", handler.SaveStatistics)
 	e.DELETE("/statistics", handler.ResetStatistics)
-}
-
-func getStatusCode(err error) int {
-	if err == nil {
-		return http.StatusOK
-	}
-
-	log.Error().Msg(err.Error())
-	switch err {
-	//case domain.ErrInternalServerError:
-	//	return http.StatusInternalServerError
-	//case domain.ErrNotFound:
-	//	return http.StatusNotFound
-	default:
-		return http.StatusInternalServerError
-	}
 }
