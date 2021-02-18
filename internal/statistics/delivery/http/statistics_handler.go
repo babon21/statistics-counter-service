@@ -7,7 +7,7 @@ import (
 	"github.com/babon21/statistics-counter-service/internal/statistics/service"
 	"github.com/babon21/statistics-counter-service/pkg/delivery/http/api"
 	"github.com/go-playground/validator/v10"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo"
 	"net/http"
 	"time"
 )

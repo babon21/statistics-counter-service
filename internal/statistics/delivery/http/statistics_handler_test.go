@@ -8,7 +8,7 @@ import (
 	"github.com/babon21/statistics-counter-service/internal/statistics/domain/mocks"
 	"github.com/babon21/statistics-counter-service/pkg/delivery/http/api"
 	"github.com/bxcodec/faker/v3"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"

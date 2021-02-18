@@ -3,12 +3,13 @@ package main
 import (
 	"fmt"
 	"github.com/babon21/statistics-counter-service/internal/config"
+	"github.com/babon21/statistics-counter-service/internal/http/middleware"
 	statisticsHttp "github.com/babon21/statistics-counter-service/internal/statistics/delivery/http"
 	statisticsRepository "github.com/babon21/statistics-counter-service/internal/statistics/repository/postgres"
 	statisticsService "github.com/babon21/statistics-counter-service/internal/statistics/service"
 	_ "github.com/jackc/pgx/v4/stdlib"
 	"github.com/jmoiron/sqlx"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo"
 	"github.com/rs/zerolog/log"
 )
 
@@ -28,8 +29,8 @@ func main() {
 	}
 
 	e := echo.New()
-	//middL := middleware.InitMiddleware()
-	//e.Use(middL.AccessLogMiddleware)
+	middL := middleware.InitMiddleware()
+	e.Use(middL.AccessLogMiddleware)
 	roomRepo := statisticsRepository.NewPostgresStatisticsRepository(db)
 	roomUsecase := statisticsService.NewStatisticsService(roomRepo)
 	statisticsHttp.NewStatisticsHandler(e, roomUsecase)
